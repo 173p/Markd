@@ -1,0 +1,211 @@
+/**
+ * Markd Chapter UI Styles
+ * Mimics YouTube's native chapter markers with labels
+ */
+
+/* Ensure YouTube's native buffered/loaded progress is visible */
+.ytp-load-progress {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  z-index: 30 !important;
+}
+
+/* Container - integrates with YouTube's progress bar */
+.markd-chapters-container {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  pointer-events: none;
+  z-index: 40;
+  overflow: hidden;
+}
+
+/* Chapter segment - visible with labels */
+.markd-chapter-marker {
+  position: relative;
+  height: 100%;
+  flex-shrink: 0;
+  cursor: pointer;
+  overflow: hidden;
+  pointer-events: auto;
+
+  /* Transparent background to show YouTube's native colors */
+  background: transparent !important;
+
+  /* Thick separator between chapters */
+  border-right: 3px solid rgba(0, 0, 0, 0.6);
+
+  /* Smooth transition */
+  transition: background 0.15s ease;
+
+  /* Prevent any text from outside bleeding in */
+  isolation: isolate;
+}
+
+/* Last chapter - no border */
+.markd-chapter-marker:last-child {
+  border-right: none;
+}
+
+/* Hover effect - subtle overlay */
+.markd-chapter-marker:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Active/playing chapter - subtle highlight */
+.markd-chapter-marker.active {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.markd-chapter-marker.active:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Chapter label visible on segment - HIDDEN to prevent clutter */
+.markd-chapter-label {
+  display: none;
+  position: absolute;
+  left: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+
+  font-family: Roboto, Arial, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9) !important;
+  background: transparent !important;
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: calc(100% - 8px);
+
+  pointer-events: none;
+  user-select: none;
+  z-index: 1;
+}
+
+/* Hide label on very narrow segments */
+.markd-chapter-marker[style*="width: 0."],
+.markd-chapter-marker[style*="width: 1."],
+.markd-chapter-marker[style*="width: 2."],
+.markd-chapter-marker[style*="width: 3."],
+.markd-chapter-marker[style*="width: 4."] {}
+
+.markd-chapter-marker[style*="width: 0."] .markd-chapter-label,
+.markd-chapter-marker[style*="width: 1."] .markd-chapter-label,
+.markd-chapter-marker[style*="width: 2."] .markd-chapter-label,
+.markd-chapter-marker[style*="width: 3."] .markd-chapter-label,
+.markd-chapter-marker[style*="width: 4."] .markd-chapter-label,
+.markd-chapter-marker[style*="width: 5."] .markd-chapter-label {
+  display: none;
+}
+
+/* Brighten label on hover */
+.markd-chapter-marker:hover .markd-chapter-label {
+  color: #fff !important;
+  background: transparent !important;
+}
+
+/* Active chapter label - brighter white only, NO yellow */
+.markd-chapter-marker.active .markd-chapter-label {
+  color: #fff !important;
+  background: transparent !important;
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.9);
+  font-weight: 600;
+}
+
+/* Tooltip (fallback for hover) */
+.markd-chapter-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 10px;
+
+  background: rgba(28, 28, 28, 0.95);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 3px;
+  font-size: 12px;
+  font-family: Roboto, Arial, sans-serif;
+  font-weight: 500;
+  white-space: nowrap;
+  max-width: 250px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+
+  z-index: 2000;
+}
+
+.markd-chapter-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border: 5px solid transparent;
+  border-top-color: rgba(28, 28, 28, 0.95);
+}
+
+.markd-chapter-marker:hover .markd-chapter-tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Current chapter name next to time display */
+.markd-current-chapter {
+  display: inline-block;
+  margin-left: 12px;
+  padding: 2px 0px;
+  background: transparent;
+  color: #eee;
+  font-size: 13px;
+  font-family: Roboto, Arial, sans-serif;
+  font-weight: 500;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+/* Remove focus outline - markers are clickable but not tab-focusable */
+.markd-chapter-marker:focus,
+.markd-chapter-marker:focus-visible {
+  outline: none !important;
+}
+
+.markd-chapter-marker:focus:not(:focus-visible) {
+  outline: none !important;
+}
+
+/* Empty/disabled states */
+.markd-chapters-container:empty {
+  display: none;
+}
+
+.markd-chapters-container[data-disabled="true"] {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+
+  .markd-chapter-marker,
+  .markd-chapter-tooltip {
+    transition: none !important;
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "manifest_version": 3,
+  "name": "Markd",
+  "version": "1.0.0",
+  "description": "Automatically generates YouTube chapters from comment timestamps with auto-fixing of invalid formats",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "markd@youtube-chapters.extension",
+      "strict_min_version": "109.0"
+    }
+  },
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "*://*.youtube.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.youtube.com/watch*"
+      ],
+      "js": [
+        "src/utils/browserCompat.js",
+        "src/utils/logger.js",
+        "src/utils/storage.js",
+        "src/utils/domObserver.js",
+        "src/utils/pageDataExtractor.js",
+        "src/content/timestampParser.js",
+        "src/content/sponsorBlockAPI.js",
+        "src/content/invidiousAPI.js",
+        "src/content/descriptionParser.js",
+        "src/content/chapterManager.js",
+        "src/content/playerIntegration.js",
+        "src/content/uiInjector.js",
+        "src/content/commentScanner.js",
+        "src/content/content.js"
+      ],
+      "css": [
+        "src/styles/variables.css",
+        "src/styles/chapters.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_icon": {
+      "16": "icons/favicon-16x16.png",
+      "32": "icons/favicon-32x32.png",
+      "48": "icons/android-chrome-192x192.png",
+      "128": "icons/android-chrome-512x512.png"
+    }
+  },
+  "icons": {
+    "16": "icons/favicon-16x16.png",
+    "32": "icons/favicon-32x32.png",
+    "48": "icons/android-chrome-192x192.png",
+    "128": "icons/android-chrome-512x512.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "src/styles/*.css",
+        "src/utils/pageDataInjector.js"
+      ],
+      "matches": [
+        "*://*.youtube.com/*"
+      ]
+    }
+  ]
+}

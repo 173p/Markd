@@ -1,0 +1,43 @@
+/**
+ * Markd CSS Variables
+ * Color palette and design tokens
+ */
+
+:root {
+  /* Markd Brand Colors */
+  --markd-bg: #050A12;
+  --markd-primary: #D6FF2E;
+  --markd-secondary: #9DFF00;
+  --markd-surface: #2C2F36;
+  --markd-text: #E6EAF0;
+
+  /* Chapter UI Dimensions */
+  --markd-progress-height: 5px;
+  --markd-hover-height: 8px;
+  --markd-chapter-border: 1px solid rgba(255, 255, 255, 0.1);
+  --markd-tooltip-offset: 10px;
+
+  /* Transitions */
+  --markd-transition-fast: 150ms ease;
+  --markd-transition-normal: 250ms ease;
+  --markd-transition-slow: 350ms ease;
+
+  /* Opacity Levels */
+  --markd-opacity-low: 0.1;
+  --markd-opacity-medium: 0.15;
+  --markd-opacity-high: 0.6;
+
+  /* Z-index Layers */
+  --markd-z-chapters: 30;
+  --markd-z-chapters-below-sb: 29;
+  --markd-z-tooltip: 1000;
+
+  /* Tooltip Styling */
+  --markd-tooltip-padding: 6px 12px;
+  --markd-tooltip-radius: 4px;
+  --markd-tooltip-font-size: 12px;
+  --markd-tooltip-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+  /* Chapter Marker Styling */
+  --markd-marker-border-width: 2px;
+}

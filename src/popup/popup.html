@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markd - Paste Timestamps</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1 class="title">Markd</h1>
+      <p class="subtitle">Paste Custom Timestamps</p>
+    </div>
+
+    <div class="content">
+      <div class="instruction">
+        <p>Paste timestamps from comments or descriptions below:</p>
+        <small>Format: "0:00 Intro" or "0:00 - Intro" or "00:00 Intro"</small>
+      </div>
+
+      <textarea
+        id="timestampInput"
+        placeholder="Paste timestamps here... (Ctrl+V)&#10;&#10;Example:&#10;0:00 Introduction&#10;1:30 Main Topic&#10;5:45 Conclusion"
+        autofocus
+      ></textarea>
+
+      <div class="button-group">
+        <button id="applyBtn" class="btn btn-primary">Apply Timestamps</button>
+        <button id="clearBtn" class="btn btn-secondary">Clear</button>
+      </div>
+
+      <div id="status" class="status"></div>
+
+      <div class="preview" id="preview" style="display: none;">
+        <h3>Parsed Timestamps:</h3>
+        <div id="previewList" class="preview-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../utils/browserCompat.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
