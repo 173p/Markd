@@ -1,123 +1,151 @@
-# Markd - YouTube Timestamp Marker Extension
+<div align="center">
+  <img width="120" height="120" alt="Markd logo" src="https://github.com/user-attachments/assets/208042c0-8ba5-4230-b784-9cfe026f013c" />
 
-**Markd** automatically adds chapter markers to YouTube videos by intelligently extracting timestamps from multiple sources with priority-based loading.
+  <h1>Markd</h1>
+  <p><strong>YouTube Timestamp Marker Extension</strong></p>
 
-## Features
+  <p>
+    <a href="#-installation">Install</a> ·
+    <a href="#-usage">Usage</a> ·
+    <a href="#-features">Features</a> ·
+    <a href="#%EF%B8%8F-project-structure">Structure</a> ·
+    <a href="#-troubleshooting">Troubleshooting</a>
+  </p>
 
-- **Multi-Source Chapter Detection**:
-  1. **SponsorBlock API** - Community-submitted chapters (fastest, most reliable)
-  2. **Video Description** - Official YouTube chapters and timestamps
-  3. **Comments** - User-submitted timestamps (fallback)
+  <p>
+    <!-- Replace with real badge URLs once published -->
+    <img alt="Chrome Web Store" src="https://img.shields.io/badge/Chrome-Coming%20Soon-4285F4?logo=googlechrome&logoColor=white" />
+    <img alt="Firefox Add-ons" src="https://img.shields.io/badge/Firefox-Coming%20Soon-FF7139?logo=firefox&logoColor=white" />
+    <img alt="Manifest V3" src="https://img.shields.io/badge/Manifest-V3-green" />
+  </p>
+</div>
 
-- **Custom Timestamps**:
-  - Click extension icon to paste your own timestamps
-  - Supports formats: `0:00 Title`, `[0:00] Title`, `00:00 - Title`
-  - Overrides automatic chapters when needed
-  - Reset to original chapters anytime
+---
 
+Markd automatically adds chapter markers to YouTube videos by intelligently extracting timestamps from multiple sources with smart priority-based loading.
 
-- **Smart Detection**:
-  - Auto-detects YouTube native chapters
-  - Avoids duplicates with SponsorBlock extension
-  - Validates timestamps against video duration
+---
 
-## Installation
+## Table of Contents
 
-### Chrome / Firefox
-placeholder link for chrome
-placeholder link for firefox
+- [Features](#-features)
+- [Installation](#-installation)
+- [Usage](#-usage)
+  - [Automatic Chapter Detection](#automatic-chapter-detection)
+  - [Keyboard Shortcuts](#keyboard-shortcuts)
+  - [Custom Timestamps](#custom-timestamps)
+  - [Supported Timestamp Formats](#supported-timestamp-formats)
+  - [Chapter Source Priority](#chapter-source-priority)
+- [Project Structure](#%EF%B8%8F-project-structure)
+- [Troubleshooting](#-troubleshooting)
+- [Credits](#-credits)
 
-## Usage
+---
+
+## ✨ Features
+
+- **Multi-source chapter detection** — pulls from SponsorBlock, video descriptions, and comments
+- **Custom timestamps** — paste your own timestamps from any format via the extension popup
+- **Smart deduplication** — detects native YouTube chapters and avoids conflicts with the SponsorBlock extension
+- **Keyboard navigation** — jump between chapters without touching the mouse
+- **Validation** — timestamps are validated against actual video duration before injection
+
+---
+
+## 📦 Installation
+
+| Browser | Link |
+|---------|------|
+| Chrome  | *(coming soon)* |
+| Firefox | *(coming soon)* |
+
+> **Manual installation:** Download the latest release, go to `chrome://extensions/` (or `about:debugging` in Firefox), enable Developer Mode, and load the unpacked folder.
+
+---
+
+## 🚀 Usage
 
 ### Automatic Chapter Detection
 
-Markd automatically detects and displays chapters when you open a YouTube video:
+Markd runs automatically on every YouTube video — no setup needed.
 
-1. **Open any YouTube video** (`youtube.com/watch?v=...`)
-2. **Chapter markers appear** on the progress bar automatically
-3. **Hover over markers** to see chapter titles
-4. **Click markers** to jump to chapters
+1. Open any YouTube video (`youtube.com/watch?v=...`)
+2. Chapter markers appear on the progress bar automatically
+3. Hover over a marker to see its chapter title
+4. Click a marker to jump to that chapter
 
 ### Keyboard Shortcuts
 
-Navigate between chapters using keyboard shortcuts:
+Navigate chapters hands-free:
 
-- **Firefox**: `Ctrl + ←/→` (Left/Right Arrow) - Skip to previous/next chapter
-- **Chrome**: `Shift + ←/→` (Left/Right Arrow) - Skip to previous/next chapter
+| Browser | Shortcut | Action |
+|---------|----------|--------|
+| Firefox | `Ctrl + ←` / `Ctrl + →` | Previous / Next chapter |
+| Chrome  | `Shift + ←` / `Shift + →` | Previous / Next chapter |
 
-**Note**: Different shortcuts per browser to avoid conflicts with SponsorBlock extension
+> Different shortcuts per browser to avoid conflicts with the [SponsorBlock](https://sponsor.ajay.app/) extension.
 
 ### Custom Timestamps
 
-Add your own timestamps from comments or descriptions:
+Override automatic chapters with your own timestamps:
 
-1. **Click the Markd extension icon** while watching a video
-2. **Paste timestamps** in any supported format:
-   ```
-   0:00 Introduction
-   1:30 Main Topic
-   5:45 Conclusion
-   ```
-3. **Click "Apply Timestamps"** to override automatic chapters
-4. **Click "Clear"** to reset to original chapters
+1. Click the **Markd extension icon** while watching a video
+2. Paste timestamps into the text box (any [supported format](#supported-timestamp-formats))
+3. Click **"Apply Timestamps"** to override the current chapters
+4. Click **"Clear"** to restore the original chapters
 
 ### Supported Timestamp Formats
 
-- `0:00 Title` - Basic format
-- `0:00 - Title` - With dash separator
-- `00:00 Title` - Zero-padded
-- `[0:00] Title` - Bracketed timestamp
-- `Title - 0:00` - Reversed format
-- `1:23:45 Title` - Hour:minute:second format
+Markd parses all common timestamp styles found in descriptions and comments:
+
+| Format | Example |
+|--------|---------|
+| Basic | `0:00 Introduction` |
+| With dash | `0:00 - Introduction` |
+| Zero-padded | `00:00 Introduction` |
+| Bracketed | `[0:00] Introduction` |
+| Reversed | `Introduction - 0:00` |
+| With hours | `1:23:45 Introduction` |
 
 ### Chapter Source Priority
 
-Markd uses a smart priority system:
+Markd uses a tiered fallback system — higher-priority sources are always preferred:
 
-1. **SponsorBlock API** (highest priority)
-   - Community-verified chapters
-   - Most reliable and accurate
-   - Fetched from SponsorBlock database
+```
+1. SponsorBlock API   ← Community-verified, most reliable
+2. Video Description  ← Official creator chapters
+3. Video Comments     ← User-submitted (scans top 200 comments)
+```
 
-2. **Video Description** (medium priority)
-   - Official YouTube chapters
-   - Creator-submitted timestamps
-   - Parsed from description text
+Custom timestamps (entered via the popup) override all of the above.
 
-3. **Comments** (lowest priority / fallback)
-   - User-submitted timestamps
-   - Scanned from top 200 comments
-   - Auto-fixed and deduplicated
+---
 
 ## 🏗️ Project Structure
 
 ```
 Markd/
 ├── manifest.json                      # Extension manifest (v3)
-├── icons/                             # Extension icons
-│   ├── favicon-16x16.png
-│   ├── favicon-32x32.png
-│   ├── android-chrome-192x192.png
-│   └── android-chrome-512x512.png
+├── icons/                             # Extension icons (16, 32, 192, 512px)
 ├── src/
-│   ├── content/                       # Main extension logic
+│   ├── content/                       # Core extension logic
 │   │   ├── content.js                 # Entry point & message handling
 │   │   ├── chapterManager.js          # Chapter sourcing & validation
 │   │   ├── sponsorBlockAPI.js         # SponsorBlock integration
 │   │   ├── invidiousAPI.js            # Invidious API (fallback)
-│   │   ├── descriptionParser.js       # Description parsing
+│   │   ├── descriptionParser.js       # Description timestamp parsing
 │   │   ├── commentScanner.js          # Comment scanning
 │   │   ├── timestampParser.js         # Timestamp format parsing
-│   │   ├── uiInjector.js              # Visual chapter markers
+│   │   ├── uiInjector.js              # Visual chapter marker injection
 │   │   └── playerIntegration.js       # YouTube player controls
 │   ├── popup/                         # Extension popup UI
-│   │   ├── popup.html                 # Popup interface
-│   │   ├── popup.js                   # Popup logic
-│   │   └── popup.css                  # Popup styling
-│   ├── styles/                        # CSS files
-│   │   ├── variables.css              # Color palette
+│   │   ├── popup.html
+│   │   ├── popup.js
+│   │   └── popup.css
+│   ├── styles/
+│   │   ├── variables.css              # Color palette / CSS variables
 │   │   └── chapters.css               # Chapter marker styles
-│   └── utils/                         # Utility modules
+│   └── utils/
 │       ├── browserCompat.js           # Cross-browser API compatibility
 │       ├── logger.js                  # Debug logging
 │       ├── storage.js                 # Browser storage wrapper
@@ -126,29 +154,37 @@ Markd/
 └── README.md
 ```
 
-## Troubleshooting
+---
 
-### Chapters Not Appearing
+## 🔧 Troubleshooting
 
-1. Verify extension is enabled in `chrome://extensions/`
-2. Reload the YouTube page
-3. Ensure video has chapters from at least one source
-4. Try a different video with known chapters
+<details>
+<summary><strong>Chapters not appearing</strong></summary>
 
-### Conflicts with SponsorBlock
+1. Verify Markd is enabled at `chrome://extensions/` (or `about:addons` in Firefox)
+2. Hard-reload the YouTube page (`Ctrl+Shift+R`)
+3. Check that the video has timestamps in at least one source (description, comments, or SponsorBlock)
+4. Test on a different video with known chapters to rule out a video-specific issue
 
-- Markd automatically detects SponsorBlock extension
-- If SponsorBlock is enabled, Markd will skip injection
-- This prevents duplicate styling on the progress bar
+</details>
 
-### Wrong Chapter Source
+<details>
+<summary><strong>Conflicts with SponsorBlock</strong></summary>
 
-- Priority: SponsorBlock → Description → Comments
-- If higher-priority source exists, lower ones are skipped
-- Use custom timestamps to override any source
+Markd automatically detects if the [SponsorBlock extension](https://sponsor.ajay.app/) is active. When detected, Markd skips marker injection to prevent duplicate styling on the progress bar. This is expected behavior.
 
+</details>
+
+<details>
+<summary><strong>Wrong chapter source being used</strong></summary>
+
+Markd always uses the highest-priority source available: **SponsorBlock → Description → Comments**. If a higher-priority source exists for a video, lower-priority ones are skipped. Use the popup to paste custom timestamps if you want to override the detected source entirely.
+
+</details>
+
+---
 
 ## 🙏 Credits
 
-- **SponsorBlock** - Community chapter database
-- **Invidious** - Video metadata API
+- [**SponsorBlock**](https://github.com/ajayyy/SponsorBlock)
+- [**Invidious**](https://github.com/iv-org/invidious)
