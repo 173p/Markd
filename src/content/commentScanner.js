@@ -190,7 +190,7 @@ class CommentScanner {
 
         // Check if this is the comments panel
         if (panelRenderer.targetId === 'engagement-panel-comments-section' ||
-            panelRenderer.panelIdentifier?.includes('comment')) {
+          panelRenderer.panelIdentifier?.includes('comment')) {
 
           const content = panelRenderer.content?.sectionListRenderer;
           if (!content) continue;
@@ -226,16 +226,11 @@ class CommentScanner {
    * @param {Array<string>} commentTexts - Array of comment text strings
    */
   processCommentTexts(commentTexts) {
-    if (!window.MarkdTimestampParser) {
-      return;
-    }
-
     for (const text of commentTexts) {
       if (!text) continue;
 
-      // Parse timestamps from comment text
-      const timestamps = window.MarkdTimestampParser.parse(text);
-      if (timestamps && timestamps.length > 0) {
+      const timestamps = this.extractTimestamps(text);
+      if (timestamps.length > 0) {
         this.foundTimestamps.push(...timestamps);
       }
     }
@@ -581,6 +576,9 @@ class CommentScanner {
 
   /**
    * Extract timestamps from comment text
+   * Applies two filters per comment:
+   *  1. Must contain at least 3 timestamps
+   *  2. Letter count must not exceed 5x the timestamp-section character count
    * @param {string} text - Comment text
    * @returns {Array} - Array of timestamps
    */
@@ -590,6 +588,18 @@ class CommentScanner {
     }
 
     const timestamps = window.MarkdTimestampParser.parse(text);
+
+    if (!timestamps || timestamps.length < 3) {
+      return [];
+    }
+
+    const letterCount = (text.match(/[a-zA-Z]/g) || []).length;
+    const timestampSectionChars = (text.match(/\d{1,2}(?::\d{2})+/g) || []).join('').length;
+    // Allow up to 5x letters vs timestamp chars to account for chapter titles/labels.
+    // Beyond that ratio, the comment is likely opinion text with incidental timestamps.
+    if (letterCount > timestampSectionChars * 5) {
+      return [];
+    }
 
     return timestamps.map(ts => ({
       seconds: ts.seconds,
