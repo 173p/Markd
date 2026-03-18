@@ -40,18 +40,21 @@ class ChapterManager {
    * Priority: SponsorBlock → Description → Comments
    */
   async loadChapters() {
+    const sponsorBlockPromise = this.loadFromSponsorBlock();
+    const descriptionPromise = this.loadFromDescription();
 
-    // 1. Try SponsorBlock API first (community-submitted chapters)
-    const sponsorBlockChapters = await this.loadFromSponsorBlock();
-    if (sponsorBlockChapters.length > 0) {
-      this.chapters = sponsorBlockChapters;
-      this.chapterSource = 'sponsorblock';
+    await new Promise(resolve => setTimeout(resolve, 250));
+
+    // 1. Try Native YouTube chapters first
+    if (this.hasNativeChapters()) {
+      this.chapters = [];
+      this.chapterSource = 'native';
       this.notifyListeners();
       return;
     }
 
     // 2. Try video description (official YouTube chapters or timestamps)
-    const descriptionChapters = await this.loadFromDescription();
+    const descriptionChapters = await descriptionPromise;
     if (descriptionChapters.length > 0) {
       this.chapters = descriptionChapters;
       this.chapterSource = 'description';
@@ -59,9 +62,22 @@ class ChapterManager {
       return;
     }
 
-    // 3. Fall back to comments (slowest, least reliable)
+    // 3. Try SponsorBlock API
+    const sponsorBlockChapters = await sponsorBlockPromise;
+    if (sponsorBlockChapters.length > 0) {
+      this.chapters = sponsorBlockChapters;
+      this.notifyListeners();
+    }
+
+    // 4. Fall back to comments
     this.chapterSource = 'comments';
-    // Comments will be loaded asynchronously via CommentScanner
+
+    if (window.MarkdCommentScanner && window.MarkdCommentScanner.foundTimestamps.length > 0) {
+      const accepted = this.addChaptersFromComments(window.MarkdCommentScanner.foundTimestamps);
+      if (accepted) {
+        window.MarkdCommentScanner.foundTimestamps = [];
+      }
+    }
   }
 
   /**
@@ -103,17 +119,14 @@ class ChapterManager {
    * @param {Array} newChapters - Chapters to add
    */
   addChaptersFromComments(newChapters) {
-    // Only add from comments if we're using comment source
     if (this.chapterSource !== 'comments') {
-      return;
+      return false;
     }
 
-
-    // Merge with existing chapters
-    const allChapters = [...this.chapters, ...newChapters];
-    this.chapters = this.validateAndFormat(allChapters);
+    this.chapters = this.validateAndFormat(newChapters);
 
     this.notifyListeners();
+    return true;
   }
 
   /**
@@ -137,6 +150,28 @@ class ChapterManager {
     // Notify listeners to update UI
     this.notifyListeners();
 
+  }
+
+  /**
+   * Check if YouTube has loaded its own native chapters
+   * @returns {boolean} - True if native chapters exist
+   */
+  hasNativeChapters() {
+    const progressList = document.querySelector('.ytp-progress-list');
+    if (progressList) {
+      const hoverContainers = progressList.querySelectorAll('.ytp-chapter-hover-container');
+      if (hoverContainers.length > 1) {
+        return true;
+      }
+    }
+
+    // Also check for engagement panels that list chapters
+    const chapterPanel = document.querySelector('ytd-engagement-panel-section-list-renderer[target-id="engagement-panel-macro-markers-description-chapters"]');
+    if (chapterPanel) {
+      return true;
+    }
+
+    return false;
   }
 
   /**

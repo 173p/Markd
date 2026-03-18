@@ -168,6 +168,8 @@ class PlayerIntegration {
    * Handle time update event
    */
   handleTimeUpdate() {
+    if (this.isPlayingAd()) return;
+
     this.currentTime = this.getCurrentTime();
 
     // Update active chapter highlight
@@ -243,12 +245,25 @@ class PlayerIntegration {
    * @returns {number} - Duration in seconds
    */
   getDuration() {
+    if (this.isPlayingAd()) {
+      return this.duration || 0;
+    }
+
     if (this.player && typeof this.player.getDuration === 'function') {
       return this.player.getDuration();
     } else if (this.video) {
       return this.video.duration || 0;
     }
     return 0;
+  }
+
+  /**
+   * Check if an ad is currently playing
+   * @returns {boolean} - True if ad is playing
+   */
+  isPlayingAd() {
+    const moviePlayer = document.querySelector('#movie_player');
+    return moviePlayer && moviePlayer.classList.contains('ad-showing');
   }
 
   /**

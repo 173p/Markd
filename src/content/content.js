@@ -21,8 +21,9 @@
 
       const videoId = window.MarkdDomObserver.getCurrentVideoId();
       if (videoId) {
-        await window.MarkdChapterManager.initialize(videoId);
-        await window.MarkdCommentScanner.initialize();
+        const p1 = window.MarkdChapterManager.initialize(videoId);
+        const p2 = window.MarkdCommentScanner.initialize();
+        await Promise.all([p1, p2]);
       }
     } catch (error) {
       console.error('Markd initialization error:', error);
@@ -40,8 +41,9 @@
       await window.MarkdUIInjector.initialize();
 
       if (newVideoId) {
-        await window.MarkdChapterManager.initialize(newVideoId);
-        await window.MarkdCommentScanner.initialize();
+        const p1 = window.MarkdChapterManager.initialize(newVideoId);
+        const p2 = window.MarkdCommentScanner.initialize();
+        await Promise.all([p1, p2]);
       }
     } catch (error) {
       console.error('Markd video change error:', error);

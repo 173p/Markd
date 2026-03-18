@@ -20,11 +20,6 @@ class CommentScanner {
    * Only scan if ChapterManager is using 'comments' source
    */
   async initialize() {
-    // Only scan comments if we need them (no SponsorBlock or description chapters)
-    if (window.MarkdChapterManager?.getSource() !== 'comments') {
-      return;
-    }
-
     if (this.initialized) {
       return;
     }
@@ -593,14 +588,6 @@ class CommentScanner {
       return [];
     }
 
-    const letterCount = (text.match(/[a-zA-Z]/g) || []).length;
-    const timestampSectionChars = (text.match(/\d{1,2}(?::\d{2})+/g) || []).join('').length;
-    // Allow up to 5x letters vs timestamp chars to account for chapter titles/labels.
-    // Beyond that ratio, the comment is likely opinion text with incidental timestamps.
-    if (letterCount > timestampSectionChars * 5) {
-      return [];
-    }
-
     return timestamps.map(ts => ({
       seconds: ts.seconds,
       label: ts.label,
@@ -614,10 +601,10 @@ class CommentScanner {
    */
   notifyChapterManager() {
     if (window.MarkdChapterManager && this.foundTimestamps.length > 0) {
-      window.MarkdChapterManager.addChaptersFromComments(this.foundTimestamps);
-
-      // Clear found timestamps after notifying
-      this.foundTimestamps = [];
+      const isAccepted = window.MarkdChapterManager.addChaptersFromComments(this.foundTimestamps);
+      if (isAccepted) {
+         this.foundTimestamps = [];
+      }
     }
   }
 

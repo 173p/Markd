@@ -26,7 +26,112 @@ class UIInjector {
       this.createChapterContainer();
     }
 
+    this.observeNativeTooltip();
+
     this.initialized = true;
+  }
+
+  /**
+   * Observe YouTube's native tooltip to re-inject chapter title if YouTube updates it
+   */
+  observeNativeTooltip() {
+    if (this.tooltipObserver) return;
+
+    const tooltip = document.querySelector('.ytp-tooltip');
+    
+    // Fallback to observing movie player if tooltip isn't in DOM yet
+    const targetNode = tooltip || document.querySelector('#movie_player');
+    if (!targetNode) return;
+
+    this.tooltipObserver = new MutationObserver((mutations) => {
+      // Only process if we are actively hovering a marked chapter
+      if (!this.hoveredChapter) return;
+      
+      let shouldUpdate = false;
+      for (const mutation of mutations) {
+        if (mutation.target.closest && mutation.target.closest('.ytp-tooltip')) {
+          shouldUpdate = true;
+          break;
+        }
+      }
+      
+      if (shouldUpdate) {
+        this.updateNativeTooltip();
+      }
+    });
+
+    this.tooltipObserver.observe(targetNode, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ['style', 'class', 'aria-hidden']
+    });
+  }
+
+  /**
+   * Inject chapter title into YouTube's native tooltip
+   */
+  updateNativeTooltip() {
+    const tooltip = document.querySelector('.ytp-tooltip');
+    if (!tooltip) return;
+
+    let pill = tooltip.querySelector('.ytp-tooltip-progress-bar-pill');
+
+    if (!pill && this.hoveredChapter) {
+      const textWrapper = tooltip.querySelector('.ytp-tooltip-text-wrapper');
+      if (textWrapper) {
+        pill = document.createElement('div');
+        pill.className = 'ytp-tooltip-progress-bar-pill';
+        pill.setAttribute('data-markd-forged', 'true');
+        
+        const nativeText = textWrapper.querySelector('.ytp-tooltip-text');
+        if (nativeText) {
+          nativeText.classList.add('ytp-tooltip-progress-bar-pill-time-stamp');
+          pill.appendChild(nativeText);
+        }
+        textWrapper.appendChild(pill);
+      }
+    }
+
+    if (pill) {
+      let pillTitle = pill.querySelector('.ytp-tooltip-progress-bar-pill-title');
+      
+      // If YouTube doesn't have the title element natively, create it
+      if (!pillTitle) {
+         pillTitle = document.createElement('div');
+         pillTitle.className = 'ytp-tooltip-progress-bar-pill-title';
+         pill.appendChild(pillTitle);
+      }
+
+      if (this.hoveredChapter) {
+        if (pillTitle.textContent !== this.hoveredChapter.label) {
+          pillTitle.textContent = this.hoveredChapter.label;
+        }
+        if (pillTitle.style.display !== 'block') {
+          pillTitle.style.display = 'block';
+        }
+        if (pill.getAttribute('data-markd-pill') !== 'true') {
+          pill.setAttribute('data-markd-pill', 'true');
+        }
+      } else {
+        if (pillTitle.style.display !== 'none') {
+          pillTitle.style.display = 'none';
+        }
+        if (pill.hasAttribute('data-markd-pill')) {
+          pill.removeAttribute('data-markd-pill');
+        }
+        
+        if (pill.getAttribute('data-markd-forged') === 'true') {
+          const nativeText = pill.querySelector('.ytp-tooltip-text');
+          if (nativeText) {
+            nativeText.classList.remove('ytp-tooltip-progress-bar-pill-time-stamp');
+            pill.parentNode.appendChild(nativeText);
+          }
+          pill.remove();
+        }
+      }
+    }
   }
 
   /**
@@ -68,10 +173,24 @@ class UIInjector {
   /**
    * Inject chapter markers
    * @param {Array} chapters - Chapters to display
-   * @param {string} source - Chapter source (sponsorblock, description, comments)
+   * @param {string} source - Chapter source (sponsorblock, description, comments, native)
    */
   injectChapters(chapters, source) {
     if (!this.chaptersContainer) return;
+
+    if (source === 'native') {
+      this.chaptersContainer.innerHTML = '';
+      return;
+    }
+
+    // Don't inject during ads, wait until ad is over
+    const moviePlayer = document.querySelector('#movie_player');
+    if (moviePlayer && moviePlayer.classList.contains('ad-showing')) {
+      setTimeout(() => {
+        this.injectChapters(chapters, source);
+      }, 1000);
+      return;
+    }
 
     if (!chapters || chapters.length === 0) {
       this.chaptersContainer.innerHTML = '';
@@ -137,11 +256,23 @@ class UIInjector {
     label.textContent = chapter.label;
     marker.appendChild(label);
 
-    // Create tooltip
-    const tooltip = document.createElement('div');
-    tooltip.className = 'markd-chapter-tooltip';
-    tooltip.textContent = chapter.label;
-    marker.appendChild(tooltip);
+    // Hover handlers for native tooltip injection
+    marker.addEventListener('mouseenter', () => {
+      this.hoveredChapter = chapter;
+      this.updateNativeTooltip();
+    });
+
+    marker.addEventListener('mousemove', () => {
+      if (this.hoveredChapter !== chapter) {
+         this.hoveredChapter = chapter;
+      }
+      this.updateNativeTooltip();
+    });
+
+    marker.addEventListener('mouseleave', () => {
+      this.hoveredChapter = null;
+      this.updateNativeTooltip();
+    });
 
     // Click handler for seeking
     marker.addEventListener('click', (e) => {
@@ -261,6 +392,14 @@ class UIInjector {
     if (existing) {
       existing.remove();
     }
+
+    if (this.tooltipObserver) {
+      this.tooltipObserver.disconnect();
+      this.tooltipObserver = null;
+    }
+    
+    this.hoveredChapter = null;
+    this.updateNativeTooltip();
 
     this.initialized = false;
   }
