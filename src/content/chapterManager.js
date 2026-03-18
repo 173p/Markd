@@ -29,6 +29,8 @@ class ChapterManager {
     this.activeChapterIndex = -1;
     this.chapterSource = null;
 
+    this.observeNativeChapters();
+
     // Attempt to load chapters in priority order
     await this.loadChapters();
 
@@ -172,6 +174,28 @@ class ChapterManager {
     }
 
     return false;
+  }
+
+  // Observe for asynchronously loaded native chapters
+  observeNativeChapters() {
+    if (this.nativeChapterCheckInterval) {
+      clearInterval(this.nativeChapterCheckInterval);
+    }
+
+    // Check every second for late-loading YouTube native chapters
+    this.nativeChapterCheckInterval = setInterval(() => {
+      // Don't override user-provided chapters, but do yield if Markd injected
+      // chapters from description/comments/sponsorblock
+      if (this.chapterSource !== 'native' && this.chapterSource !== 'user' && this.hasNativeChapters()) {
+        this.chapters = [];
+        this.chapterSource = 'native';
+        if (this.nativeChapterCheckInterval) {
+          clearInterval(this.nativeChapterCheckInterval);
+          this.nativeChapterCheckInterval = null;
+        }
+        this.notifyListeners();
+      }
+    }, 1000);
   }
 
   /**
@@ -345,6 +369,10 @@ class ChapterManager {
     this.videoId = null;
     this.initialized = false;
     this.chapterSource = null;
+    if (this.nativeChapterCheckInterval) {
+      clearInterval(this.nativeChapterCheckInterval);
+      this.nativeChapterCheckInterval = null;
+    }
   }
 }
 

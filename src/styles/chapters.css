@@ -3,13 +3,6 @@
  * Mimics YouTube's native chapter markers with labels
  */
 
-/* Ensure YouTube's native buffered/loaded progress is visible */
-.ytp-load-progress {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  z-index: 30 !important;
-}
 
 /* Container - integrates with YouTube's progress bar */
 .markd-chapters-container {
@@ -30,6 +23,7 @@
   position: relative;
   height: 100%;
   flex-shrink: 0;
+  box-sizing: border-box !important;
   cursor: pointer;
   overflow: hidden;
   pointer-events: auto;
@@ -121,10 +115,12 @@
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  background-color: rgba(28, 65, 115, 0.95); /* Dark blue background like native chapters */
+  background-color: rgba(28, 65, 115, 0.95);
+  /* Dark blue background like native chapters */
   border-radius: 16px;
   padding: 6px 12px;
-  gap: 8px; /* space between timer and title */
+  gap: 8px;
+  /* space between timer and title */
 }
 
 .ytp-tooltip-progress-bar-pill[data-markd-pill="true"] .ytp-tooltip-progress-bar-pill-time-stamp {
@@ -170,7 +166,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  text-shadow: 0 0 2px rgba(0,0,0,0.5);
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
 }
 
 .ytp-tooltip.ytp-preview:not(.ytp-text-detail) .ytp-tooltip-text-wrapper.markd-tooltip-active {

@@ -38,7 +38,7 @@ class UIInjector {
     if (this.tooltipObserver) return;
 
     const tooltip = document.querySelector('.ytp-tooltip');
-    
+
     // Fallback to observing movie player if tooltip isn't in DOM yet
     const targetNode = tooltip || document.querySelector('#movie_player');
     if (!targetNode) return;
@@ -46,7 +46,7 @@ class UIInjector {
     this.tooltipObserver = new MutationObserver((mutations) => {
       // Only process if we are actively hovering a marked chapter
       if (!this.hoveredChapter) return;
-      
+
       let shouldUpdate = false;
       for (const mutation of mutations) {
         if (mutation.target.closest && mutation.target.closest('.ytp-tooltip')) {
@@ -54,7 +54,7 @@ class UIInjector {
           break;
         }
       }
-      
+
       if (shouldUpdate) {
         this.updateNativeTooltip();
       }
@@ -84,7 +84,7 @@ class UIInjector {
         pill = document.createElement('div');
         pill.className = 'ytp-tooltip-progress-bar-pill';
         pill.setAttribute('data-markd-forged', 'true');
-        
+
         const nativeText = textWrapper.querySelector('.ytp-tooltip-text');
         if (nativeText) {
           nativeText.classList.add('ytp-tooltip-progress-bar-pill-time-stamp');
@@ -96,12 +96,12 @@ class UIInjector {
 
     if (pill) {
       let pillTitle = pill.querySelector('.ytp-tooltip-progress-bar-pill-title');
-      
+
       // If YouTube doesn't have the title element natively, create it
       if (!pillTitle) {
-         pillTitle = document.createElement('div');
-         pillTitle.className = 'ytp-tooltip-progress-bar-pill-title';
-         pill.appendChild(pillTitle);
+        pillTitle = document.createElement('div');
+        pillTitle.className = 'ytp-tooltip-progress-bar-pill-title';
+        pill.appendChild(pillTitle);
       }
 
       if (this.hoveredChapter) {
@@ -121,7 +121,7 @@ class UIInjector {
         if (pill.hasAttribute('data-markd-pill')) {
           pill.removeAttribute('data-markd-pill');
         }
-        
+
         if (pill.getAttribute('data-markd-forged') === 'true') {
           const nativeText = pill.querySelector('.ytp-tooltip-text');
           if (nativeText) {
@@ -176,10 +176,22 @@ class UIInjector {
    * @param {string} source - Chapter source (sponsorblock, description, comments, native)
    */
   injectChapters(chapters, source) {
-    if (!this.chaptersContainer) return;
+    // YouTube recreates the player dynamically, so we must find the active container
+    let activeContainer = this.chaptersContainer;
+    if (activeContainer && !document.body.contains(activeContainer)) {
+      activeContainer = document.querySelector('.markd-chapters-container');
+      if (activeContainer) {
+        this.chaptersContainer = activeContainer;
+        this.progressBar = activeContainer.closest('.ytp-progress-bar') || document.querySelector('.ytp-progress-bar');
+      }
+    }
+
+    if (!activeContainer && source !== 'native') return;
 
     if (source === 'native') {
-      this.chaptersContainer.innerHTML = '';
+      document.querySelectorAll('.markd-chapters-container').forEach(c => c.innerHTML = '');
+      if (activeContainer) activeContainer.innerHTML = '';
+      this.injectChapterName(null);
       return;
     }
 
@@ -193,7 +205,7 @@ class UIInjector {
     }
 
     if (!chapters || chapters.length === 0) {
-      this.chaptersContainer.innerHTML = '';
+      if (activeContainer) activeContainer.innerHTML = '';
       return;
     }
 
@@ -209,8 +221,10 @@ class UIInjector {
       if (isVisible && hasActualSegments) return;
     }
 
-    this.chaptersContainer.innerHTML = '';
-    this.chaptersContainer.setAttribute('data-source', source);
+    if (activeContainer) {
+      activeContainer.innerHTML = '';
+      activeContainer.setAttribute('data-source', source);
+    }
 
     const totalDuration = this.getDuration();
 
@@ -228,7 +242,9 @@ class UIInjector {
       const widthPercent = (chapterDuration / totalDuration) * 100;
 
       const marker = this.createChapterMarker(chapter, widthPercent, index);
-      this.chaptersContainer.appendChild(marker);
+      if (activeContainer) {
+        activeContainer.appendChild(marker);
+      }
     });
   }
 
@@ -264,7 +280,7 @@ class UIInjector {
 
     marker.addEventListener('mousemove', () => {
       if (this.hoveredChapter !== chapter) {
-         this.hoveredChapter = chapter;
+        this.hoveredChapter = chapter;
       }
       this.updateNativeTooltip();
     });
@@ -297,36 +313,33 @@ class UIInjector {
    * @param {string} chapterName - Current chapter name
    */
   injectChapterName(chapterName) {
-    // Find YouTube's time display
-    const timeDisplay = document.querySelector('.ytp-time-display');
+    // Find YouTube's time displays (could be multiple if cloned)
+    const timeDisplays = document.querySelectorAll('.ytp-time-display');
 
-    if (!timeDisplay) return;
+    // Remove ALL existing chapter names if present
+    document.querySelectorAll('.markd-current-chapter').forEach(el => el.remove());
 
-    // Remove existing chapter name if present
-    const existing = document.querySelector('.markd-current-chapter');
-    if (existing) {
-      existing.remove();
-    }
-
-    if (!chapterName) return;
+    if (timeDisplays.length === 0 || !chapterName) return;
 
     // Check if YouTube is already showing a visible chapter name to avoid duplicates
     const youtubeChapter = document.querySelector('.ytp-chapter-title');
     if (youtubeChapter &&
-        youtubeChapter.offsetParent !== null &&
-        youtubeChapter.textContent.trim() &&
-        getComputedStyle(youtubeChapter).display !== 'none') {
+      youtubeChapter.offsetParent !== null &&
+      youtubeChapter.textContent.trim() &&
+      getComputedStyle(youtubeChapter).display !== 'none') {
       // YouTube is already showing chapters, don't duplicate
       return;
     }
 
-    // Create chapter name element
-    const chapterNameEl = document.createElement('span');
-    chapterNameEl.className = 'markd-current-chapter';
-    chapterNameEl.textContent = chapterName;
+    // Create chapter name element for each time display
+    timeDisplays.forEach(timeDisplay => {
+      const chapterNameEl = document.createElement('span');
+      chapterNameEl.className = 'markd-current-chapter';
+      chapterNameEl.textContent = chapterName;
 
-    // Insert after time display
-    timeDisplay.parentNode.insertBefore(chapterNameEl, timeDisplay.nextSibling);
+      // Insert after time display
+      timeDisplay.parentNode.insertBefore(chapterNameEl, timeDisplay.nextSibling);
+    });
   }
 
   /**
@@ -397,7 +410,7 @@ class UIInjector {
       this.tooltipObserver.disconnect();
       this.tooltipObserver = null;
     }
-    
+
     this.hoveredChapter = null;
     this.updateNativeTooltip();
 
