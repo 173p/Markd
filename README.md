@@ -13,9 +13,8 @@
   </p>
 
   <p>
-    <!-- Replace with real badge URLs once published -->
-    <img alt="Chrome Web Store" src="https://img.shields.io/badge/Chrome-Coming%20Soon-4285F4?logo=googlechrome&logoColor=white" />
-    <img alt="Firefox Add-ons" src="https://img.shields.io/badge/Firefox-Coming%20Soon-FF7139?logo=firefox&logoColor=white" />
+    <a href="https://chromewebstore.google.com/detail/markd/ongfdgkppochlbhfhbefholckncofoeh"><img alt="Chrome Web Store" src="https://img.shields.io/badge/Chrome-Available-4285F4?logo=googlechrome&logoColor=white" /></a>
+    <a href="https://addons.mozilla.org/en-US/firefox/addon/markd/"><img alt="Firefox Add-ons" src="https://img.shields.io/badge/Firefox-Available-FF7139?logo=firefox&logoColor=white" /></a>
     <img alt="Manifest V3" src="https://img.shields.io/badge/Manifest-V3-green" />
   </p>
 </div>
@@ -56,8 +55,8 @@ Markd automatically adds chapter markers to YouTube videos by intelligently extr
 
 | Browser | Link |
 |---------|------|
-| Chrome  | *(coming soon)* |
-| Firefox | *(coming soon)* |
+| Chrome  | [Chrome Web Store](https://chromewebstore.google.com/detail/markd/ongfdgkppochlbhfhbefholckncofoeh) |
+| Firefox | [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/markd/) |
 
 > **Manual installation:** Download the latest release, go to `chrome://extensions/` (or `about:debugging` in Firefox), enable Developer Mode, and load the unpacked folder.
 
